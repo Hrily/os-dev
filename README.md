@@ -6,6 +6,12 @@ by Nick Blunden.
 
 ## Usage
 
+### Compile Boot Sector Assembly Code
+
+```
+nasm boot-sector.asm -f bin -o boot-sector.bin
+```
+
 ### Start the Boot Sector
 
 ```
