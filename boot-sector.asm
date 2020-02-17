@@ -1,18 +1,24 @@
 ;
-; A simple boot sector that prints a message to the screen using a BIOS routine.
+; A boot sector that prints a string using print function.
 ;
-mov ah, 0x0e               ; int 10/ ah = 0xeh -> scrolling teletype BIOS routine
-mov al, 'H'
-int 0x10
-mov al, 'e'
-int 0x10
-mov al, 'l'
-int 0x10
-mov al, 'l'
-int 0x10
-mov al, 'o'
-int 0x10
-jmp $                       ; Jump to the current address ( i.e. forever ).
+[org 0x7c00]               ; Tell the assembler where this code will be loaded
+
+mov bx, HELLO_MSG
+call print_ln
+
+mov bx, GOODBYE_MSG
+call print_ln
+
+jmp $                      ; Jump to the current address ( i.e. forever ).
+
+%include "lib/print.asm"
+
+; Data
+HELLO_MSG:
+db 'Hello, World!', 0       ; The zero on the end tells our routine
+                            ; when to stop printing characters.
+GOODBYE_MSG:
+db 'Goodbye!', 0
 
 ;
 ; Padding and magic BIOS number.
