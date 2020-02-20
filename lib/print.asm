@@ -32,3 +32,60 @@ print_ln:
 	int 0x10
 	popa                  ; pop all registers saved in stack
 	ret
+
+; function map_num_to_hex_ascii
+;   maps int number to equivalent ascii hex representation
+;   @param  ax the number
+;   @return ax the ascii representation
+map_num_to_hex_ascii:
+	cmp ax, 0x09
+	jg  map_num_to_hex_ascii__letter
+	add ax, 0x30          ; if ax <= 9 -> ax = ax + '0'
+	ret
+map_num_to_hex_ascii__letter:
+	add ax, 0x57          ; if ax > 9  -> ax = ax + 'a' - 0xa
+	ret
+
+; function print_hex
+;   prints given number as a hex string
+;   @param dx the number to print
+print_hex:
+	pusha
+	xor ax, ax            ; ax = 0
+	mov bx, PRINT_HEX_TEMPLATE
+	add bx, 0x05          ; point to end of string
+; 0th index
+	mov al, dl
+	and al, 0x0f
+	call map_num_to_hex_ascii
+	mov [bx], al
+	dec bx
+; 1st index
+	mov al, dl
+	shr al, 4             ; shift al by 4 bits to right
+	call map_num_to_hex_ascii
+	mov [bx], al
+	dec bx
+; 2nd index
+	mov al, dh
+	and al, 0x0f
+	call map_num_to_hex_ascii
+	mov [bx], al
+	dec bx
+; 3rd index
+	mov al, dh
+	shr al, 4             ; shift al by 4 bits to right
+	call map_num_to_hex_ascii
+	mov [bx], al
+	sub bx, 0x02          ; to start of PRINT_HEX_TEMPLATE
+	call print_ln
+	popa
+	ret
+
+;
+; Data
+;
+
+; PRINT_HEX_TEMPLATE is the output template of print_hex function
+PRINT_HEX_TEMPLATE:
+	db '0x0000', 0

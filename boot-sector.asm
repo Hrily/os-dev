@@ -9,6 +9,9 @@ call print_ln
 mov bx, GOODBYE_MSG
 call print_ln
 
+mov dx, [HEX_TEST]
+call print_hex
+
 jmp $                      ; Jump to the current address ( i.e. forever ).
 
 %include "lib/print.asm"
@@ -19,6 +22,9 @@ db 'Hello, World!', 0       ; The zero on the end tells our routine
                             ; when to stop printing characters.
 GOODBYE_MSG:
 db 'Goodbye!', 0
+
+HEX_TEST:
+dw 0xdead
 
 ;
 ; Padding and magic BIOS number.
