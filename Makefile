@@ -1,5 +1,13 @@
 QEMU := qemu-system-i386
 
+# Automatically generate lists of sources using wildcards .
+C_SOURCES = $(wildcard ckernel/*.c drivers/*.c)
+HEADERS = $(wildcard ckernel/*.h drivers/*.h)
+
+# TODO: Make sources dep on all header files
+# Convert the *.c filenames to *.o to give a list of object files to build
+OBJ = ${C_SOURCES:.c=.o}
+
 all: os-image
 
 # Run qemu to simulate booting of our code .
@@ -8,23 +16,21 @@ run: build
 
 # This is the actual disk image that the computer loads ,
 # which is the combination of our compiled bootsector and kernel
-os-image: boot-sector.bin ckernel/kernel.bin
+os-image: boot-sector.bin ckernel.bin
 	cat $^ > os-image
 
 # This builds the binary of our kernel from two object files :
 # - the kernel_entry , which jumps to main () in our kernel
 # - the compiled C kernel
-ckernel/kernel.bin: ckernel/kernel.o
-	ld -o ckernel/kernel.bin -Ttext 0x1000 $^ --oformat binary
+ckernel.bin: ${OBJ}
+	ld -o ckernel.bin -Ttext 0x1000 $^ --oformat binary
 
-# Build our kernel object file
-ckernel/kernel.o: ckernel/kernel.c
+# Generic rule for compiling C code to an object file
+# For simplicity, we C files depend on all header files
+%.o: %.c ${HEADERS}
 	gcc -fno-pie -ffreestanding -c $< -o $@
 
-# Assemble the boot sector to raw machine code
-# The -I options tells nasm where to find our useful assembly
-# routines that we include in boot-sector.asm
-boot-sector.bin: boot-sector.asm
+%.bin : %.asm
 	nasm $< -f bin -o $@
 
 # Clear away all generated files .
@@ -32,7 +38,7 @@ clean:
 	rm -fr *.bin */*.bin *.dis *.o */*.o os-image *.map
 
 # Disassemble our kernel, might be useful for debugging
-kernel.dis: kernel.bin
+ckernel.dis: ckernel.bin
 	ndisasm -b 32 $< > $@
 
 #
@@ -40,6 +46,7 @@ kernel.dis: kernel.bin
 #
 
 build:
+	docker build . -t os-image; \
 	docker create --name os-image-container os-image; \
 	docker cp os-image-container:/os-dev/os-image .; \
 	docker rm os-image-container
