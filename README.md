@@ -6,14 +6,23 @@ by Nick Blunden.
 
 ## Usage
 
-### Compile Boot Sector Assembly Code
+### Build
+
+You can build the image using:
 
 ```
-nasm boot-sector.asm -f bin -o boot-sector.bin
+make all
 ```
 
-### Start the Boot Sector
+In case you want to use docker for build (if you are not on linux)
 
 ```
-qemu boot-sector.bin
+make build
+```
+
+### Run
+
+Run the image using qemu
+```
+qemu-system-i386 os-image
 ```
