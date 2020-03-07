@@ -19,6 +19,9 @@ disk_load :
 	cmp dh, al                  ; if AL ( sectors read ) != DH ( sectors expected )
 	jne disk_error              ; display error message
 	ret
+carry_error:
+	mov bx, CARRY_ERROR
+	call print_ln
 disk_error :
 	mov bx, DISK_ERROR_MSG
 	call print_ln
@@ -29,3 +32,4 @@ disk_error :
 ;
 
 DISK_ERROR_MSG:          db "[DISK] Read error !", 0
+CARRY_ERROR:             db "[DISK] CARRY_ERROR !", 0
